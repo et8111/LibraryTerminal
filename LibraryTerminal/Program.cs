@@ -56,10 +56,11 @@ namespace LibraryTerminal
 
             print(library, sorter);
             Search(library[0]);
-            //Console.WriteLine(library[11][0].Contains("The"));
-            var k = library.OrderBy(a => a.Value[0]).Where(a => a.Value[0].Contains("The"));
+
+            var k = library.OrderBy(a => a.Value[0]).Where(a => a.Value[0].Contains("B"));
             foreach(var v in k)
                 Console.WriteLine(v.Value[0]);
         }
     }
 }
+
