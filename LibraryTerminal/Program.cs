@@ -24,10 +24,27 @@ namespace LibraryTerminal
             library[11] = new List<string>() { "The Adventures of Captain Underpants", "Dav Pilkey", "Action/Adventure", "in", "" };
         }
 
-        static Dictionary<int, List<string>> SORT(Dictionary<int, List<string>> library, int s, ref string sorter)
+        static Dictionary<int, List<string>> SORT(Dictionary<int, List<string>> library, List<string> labels, ref string sorter)
         {
-            sorter = (s == 0) ? "Name" : "Author";
-            return library.OrderBy(a => a.Value[s]).ToDictionary(a => a.Key, a => a.Value);
+            int s = 0;
+            for (int i = 0; i < labels.Count; i++)
+                Console.WriteLine($"{i+1}) {labels[i]}");
+            Console.Write($"6) Exit\n----------\nSort By: ");
+            s = int.Parse(Console.ReadLine())-1;
+            if (s == 5)
+                return library;
+            else if (s >= 0 && s <= 4)
+            {
+                sorter = labels[s];
+                print(library, sorter);
+                SORT(library.OrderBy(a => a.Value[s]).ToDictionary(a => a.Key, a => a.Value), labels, ref sorter);
+            }
+            else
+            {
+                Console.WriteLine("BAD NUMBER");
+                SORT(library, labels, ref sorter);
+            }
+            return library;
         }
 
         static void print(Dictionary<int, List<string>> library, string sorter)
@@ -50,16 +67,15 @@ namespace LibraryTerminal
         static void Main(string[] args)
         {
             Dictionary<int, List<string>> library = new Dictionary<int, List<string>>();
-            string sorter = "Name";
+            List<string> labels = new List<string>() { "Title:", "Author:", "Genre:", "Status:", "Date:" };
             loader(library);
-            library = SORT(library, 0,ref sorter);
+            string sorter = "Name";
+            library = SORT(library, labels, ref sorter);
+            //Search(library[0]);
 
-            print(library, sorter);
-            Search(library[0]);
-
-            var k = library.OrderBy(a => a.Value[0]).Where(a => a.Value[0].Contains("B"));
-            foreach(var v in k)
-                Console.WriteLine(v.Value[0]);
+            //var k = library.OrderBy(a => a.Value[0]).Where(a => a.Value[0].Contains("B"));
+            //foreach(var v in k)
+            //    Console.WriteLine(v.Value[0]);
         }
     }
 }
