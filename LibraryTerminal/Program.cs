@@ -9,7 +9,7 @@ namespace LibraryTerminal
     class Program
     {
         static void loader(Dictionary<int, List<string>> library)
-        {
+        {//strictly for loading base info at start
             library[0] = new List<string>() { "Behold a Pale Horse", "Milton William Cooper", "Fiction", "in", "" };
             library[1] = new List<string>() { "The Master and Margarita", "Mikhail Bulgakov", "Fiction", "in", "" };
             library[2] = new List<string>() { "Galveston: A Novel", "Nic Pizzolatto", "Fiction", "in", "" };
@@ -26,56 +26,79 @@ namespace LibraryTerminal
 
         static Dictionary<int, List<string>> SORT(Dictionary<int, List<string>> library, List<string> labels, ref string sorter)
         {
-            int s = 0;
-            for (int i = 0; i < labels.Count; i++)
-                Console.WriteLine($"{i+1}) {labels[i]}");
-            Console.Write($"6) Exit\n----------\nSort By: ");
-            s = int.Parse(Console.ReadLine())-1;
+            print(library, sorter);
+            for (int i = 0; i < labels.Count; i++)              //
+                Console.WriteLine($"{i+1}) {labels[i]}");       //Print all labels for user to choose from
+            Console.Write($"6) Exit\n----------\nSort By: ");   //
+            Console.WriteLine();                                //
+            int s = int.Parse(Console.ReadLine())-1;
             if (s == 5)
-                return library;
+                return library;                                 //Exits SORT() function when satisfied
             else if (s >= 0 && s <= 4)
             {
-                sorter = labels[s];
-                print(library, sorter);
+                sorter = labels[s];               //set sorter equal to the new label to sort by then pass lambda sort as dictionary back into sort
                 SORT(library.OrderBy(a => a.Value[s]).ToDictionary(a => a.Key, a => a.Value), labels, ref sorter);
             }
             else
-            {
-                Console.WriteLine("BAD NUMBER");
-                SORT(library, labels, ref sorter);
+            {                                                   //
+                Console.WriteLine("BAD NUMBER");                //user entered wrong
+                SORT(library, labels, ref sorter);              //
             }
             return library;
         }
 
         static void print(Dictionary<int, List<string>> library, string sorter)
         {
-            Console.WriteLine($"*{sorter} sorted");
-            Console.WriteLine($"{"Title:", -40}|{"Auther:", -21}|{"Genre:", -16}|{"Status:", -8}|{"Date:", -6}|");
-            Console.WriteLine("=".PadLeft(96, '='));
-            foreach (var v in library)
-                Console.Write($"{v.Value[0],-40}|{v.Value[1],-21}|{v.Value[2],-16}|{v.Value[3],-8}|{v.Value[4],-6}|\n");
+            int i = 1;
+            Console.WriteLine($"*{sorter} sorted");     //let user know what category is being sorted
+            Console.WriteLine($"{"Title:", -44}|{"Auther:", -21}|{"Genre:", -16}|{"Status:", -8}|{"Date:", -6}|");               //
+            Console.WriteLine("=".PadLeft(96, '='));                                                                             //print categories
+            foreach (var v in library)                                                                                           //
+                Console.Write($"{i++,2}) {v.Value[0],-40}|{v.Value[1],-21}|{v.Value[2],-16}|{v.Value[3],-8}|{v.Value[4],-6}|\n");//
             Console.WriteLine();
         }
-        static void Search(List<string> v)
+        static void Search(Dictionary<int,List<string>> library, List<string> labels, string sorter)
         {
-            Console.WriteLine($"{"Title:",-40}|{"Auther:",-21}|{"Genre:",-16}|{"Status:",-8}|{"Date:",-6}|");
-            Console.WriteLine("=".PadLeft(96, '='));
-            Console.Write($"{v[0],-40}|{v[1],-21}|{v[2],-16}|{v[3],-8}|{v[4],-6}|\n");
-            Console.WriteLine();
+            for (int i = 0; i < labels.Count; i++)                                              //
+                Console.WriteLine($"{i + 1}) {labels[i]}");                                     //user choosed a label
+            Console.Write($"6) Exit\n----------\nSearch For: ");                                //
+            int s = int.Parse(Console.ReadLine()) - 1;
+            if (s == 5)
+                return;
+            else if (s >= 0 && s <= 4)
+            {
+                Console.Write($"Search {labels[s]} ");                                          //Prompt user for
+                string word = Console.ReadLine();                                               //word to search in label[s].
+                var k = library.OrderBy(a => a.Value[s]).Where(a => a.Value[s].Contains(word)); //sort label[s] then sub list collections containing that word[word] in label.
+                print(k.ToDictionary(a=>a.Key,b =>b.Value), sorter);                            //pump new dictionary into print function so user can see it.
+                Search(library, labels, sorter);                                                //go back to search function.
+            }
+            else
+            {
+                Console.WriteLine("BAD NUMBER");
+                SORT(library, labels, ref sorter);
+            }
         }
 
         static void Main(string[] args)
         {
             Dictionary<int, List<string>> library = new Dictionary<int, List<string>>();
             List<string> labels = new List<string>() { "Title:", "Author:", "Genre:", "Status:", "Date:" };
+            DateTime d = new DateTime();
             loader(library);
             string sorter = "Name";
-            library = SORT(library, labels, ref sorter);
-            //Search(library[0]);
-
-            //var k = library.OrderBy(a => a.Value[0]).Where(a => a.Value[0].Contains("B"));
-            //foreach(var v in k)
-            //    Console.WriteLine(v.Value[0]);
+            try
+            {
+                //library = SORT(library, labels, ref sorter);                                                  //Done
+                //print(library, sorter);                                                                       //Done
+                Search(library, labels, sorter);                                                              //Done
+                //Console.WriteLine(DateTime.Today.Day + "/" + DateTime.Today.Month);
+                print(library, sorter);
+            }
+            catch(Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
         }
     }
 }
