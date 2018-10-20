@@ -3,10 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-/*
- * Still need to return a book. Possibly return a book via 'search()' instead of using 'RENT()'.
- * Set something (one or 2 itmes) equal to rented out at initialization so return can be tested.
- */
 
 namespace LibraryTerminal
 {
@@ -26,12 +22,11 @@ namespace LibraryTerminal
             library[9] = new List<string>() { "9","Brown Bear, Brown Bear, What Do You See?", "Bill Marin Jr.", "Kids", "in", "" };
             library[10] = new List<string>() { "10","Full Disclosure", "Stormy Daniels", "Biography", "in", "" };
             library[11] = new List<string>() { "11","The Adventures of Captain Underpants", "Dav Pilkey", "Action/Adventure", "in", "" };
-            library[12] = new List<string>() { "12","The Adventures of Captain Underpants", "Dav Pilkey", "Action/Adventure", "in", "" };
         }
 
         static void print(Dictionary<int, List<string>> library, string sorter)
         {
-            Console.WriteLine($"*{sorter} sorted");     //let user know what category is being sorted
+            Console.WriteLine($"\n*{sorter} sorted");     //let user know what category is being sorted
             Console.WriteLine($"{"ID",-2}){"Title:",-40}|{"Auther:",-21}|{"Genre:",-16}|{"Status:",-8}|{"Return:",-6}|");         //
             Console.WriteLine("=".PadLeft(100, '='));                                                                             //print categories
             foreach (var v in library)                                                                                            //
@@ -55,16 +50,16 @@ namespace LibraryTerminal
             int s = options(labels, "Sort By");
             if (s == 6)
                 return library;    //Exits SORT() function when satisfied
+            else if (s > 6 || s < 0)
+            {
+                Console.WriteLine("BAD NUMBER");               //user entered wrong
+                library = SORT(library, labels, ref sorter);   //
+            }
             sorter = labels[s];
             if (s == 0)
                 library = SORT(library.OrderBy(a => int.Parse(a.Value[0])).ToDictionary(a => a.Key, a => a.Value), labels, ref sorter);
             else if (s >= 1 && s <= 5)//(s >= 1 && s <= 5)
                 library = SORT(library.OrderBy(a => a.Value[s]).ToDictionary(a => a.Key, a => a.Value), labels, ref sorter);
-            else
-            {                                                  //
-                Console.WriteLine("BAD NUMBER");               //user entered wrong
-                library = SORT(library, labels, ref sorter);   //
-            }
             return library;
         }
 
@@ -83,8 +78,10 @@ namespace LibraryTerminal
                 else
                     tempD = library.Where(a => a.Value[s].Contains(word)).ToDictionary(a => a.Key, a => a.Value); ;//sort label[s] then sub list collections containing that word[word] in label.
                 print(tempD.ToDictionary(a => a.Key, b => b.Value), sorter); //pump new dictionary into print function so user can see it.
-                if (tempD.Count() == 1 && tempD[tempD.Keys.First()][3] == "in")
-                    RENTER(ref library, labels, sorter, tempD.Keys.First());
+                if (tempD.Count() == 1 && tempD[tempD.Keys.First()][4] == "in")//rent book
+                    RENTER(ref library, labels, sorter, tempD.Keys.First(), "rent");
+                else if (tempD.Count() == 1 && tempD[tempD.Keys.First()][4] == "out")//return book
+                    RENTER(ref library, labels, sorter, tempD.Keys.First(), "return");
                 Search(library, labels, sorter);                         //go back to search function.
             }
             else
@@ -94,17 +91,16 @@ namespace LibraryTerminal
             }
             return library;
         }
-        static void RENTER(ref Dictionary<int,List<string>> library, List<string> labels, string sorter, int key)
+        static void RENTER(ref Dictionary<int,List<string>> library, List<string> labels, string sorter, int key, string rentReturn)
         {
-            Console.Write("Enter 'y' to rent: ");
+            Console.Write($"Enter 'y' to {rentReturn}: ");
             if (Console.ReadLine() == "y")
             {
                 DateTime d = new DateTime();
                 d = DateTime.Now.AddDays(14);
-                library[key][3] = "out";
-                library[key][4] = d.ToString("MM/dd").ToString();
+                library[key][4] = (rentReturn == "rent") ? "out" : "in";                                //if rentReturn == "rent" set to out
+                library[key][5] = (rentReturn == "rent") ? d.ToString("MM/dd").ToString() : "";         //if rentReturn == "rent" set return date
                 print(library.Where(a => a.Key == key).ToDictionary(a => a.Key, b => b.Value), sorter);
-                return;
             }
         }
 
@@ -134,31 +130,5 @@ namespace LibraryTerminal
                 }
             }
         }
-
-
-        //static Dictionary<string, List<string>> RENT(Dictionary<string, List<string>> library, List<string> labels, string sorter, DateTime d)
-        //{
-        //    string temp = "";
-        //    Console.WriteLine("~RENT BY ID~");
-        //    Console.Write("Enter ID ");
-        //    temp = Console.ReadLine();
-        //    if (!int.TryParse(temp, out int n) || int.Parse(temp) > library.Count() - 1 || int.Parse(temp) < 0)//validate temp
-        //    {                                                                                                  //
-        //        Console.WriteLine("BAD INPUT");                                                                //
-        //        library = RENT(library, labels, sorter, d);                                                    //
-        //    }
-        //    if (library[n][3] == "out")                                                                        //If already checked out cry :(
-        //    {                                                                                                  //
-        //        Console.WriteLine("That books already Checked out :(");                                        //
-        //        return library;                                                                                //
-        //    }
-        //    d = DateTime.Now.AddDays(14);
-        //    Console.WriteLine(d.ToString());
-        //    library[n][3] = "out";
-        //    library[n][4] = d.ToString("MM/dd").ToString();
-        //    print(library.Where(a => a.Key == n).ToDictionary(a => a.Key, b => b.Value), sorter);
-        //    return library;
-        //}
-
     }
 }
