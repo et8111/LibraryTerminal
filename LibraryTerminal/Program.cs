@@ -32,7 +32,7 @@ namespace LibraryTerminal
         {
             Console.WriteLine($"*{sorter} sorted");     //let user know what category is being sorted
             Console.WriteLine($"{"ID",-2}){"Title:",-40}|{"Auther:",-21}|{"Genre:",-16}|{"Status:",-8}|{"Return:",-6}|");         //
-            Console.WriteLine("=".PadLeft(100, '='));                                                                              //print categories
+            Console.WriteLine("=".PadLeft(100, '='));                                                                             //print categories
             foreach (var v in library)                                                                                            //
                 Console.Write($"{v.Key,2}){v.Value[0],-40}|{v.Value[1],-21}|{v.Value[2],-16}|{v.Value[3],-8}|{v.Value[4],-7}|\n");//
             Console.WriteLine();
@@ -54,13 +54,13 @@ namespace LibraryTerminal
                 return library;              //Exits SORT() function when satisfied
             else if (s == 0)
             {
-                sorter = labels[s];               //set 'sorter' equal to the new label to sort by then pass lambda sort as dictionary back into SORT() if ID
+                sorter = labels[s+1];               //set 'sorter' equal to the new label to sort by then pass lambda sort as dictionary back into SORT() if ID
                 library = SORT(library.OrderBy(a => a.Key).ToDictionary(a => a.Key, a => a.Value), labels, ref sorter);
             }
             else if (s >= 1 && s <= 5)
             {
                 s--;
-                sorter = labels[s];               //set 'sorter' equal to the new label to sort by then pass lambda sort as dictionary back into sort anything else
+                sorter = labels[s+1];               //set 'sorter' equal to the new label to sort by then pass lambda sort as dictionary back into sort anything else
                 library = SORT(library.OrderBy(a => a.Value[s]).ToDictionary(a => a.Key, a => a.Value), labels, ref sorter);
             }
             else
@@ -80,7 +80,7 @@ namespace LibraryTerminal
             {
                 Console.Write($"Search {labels[s]} ");                                    //Sort if label == 'ID' (Key vs Value)      
                 string word = Console.ReadLine();                                         //      
-                var k = library.OrderBy(a => a.Key).Where(a => a.Key == int.Parse(word)); //
+                var k = library.Where(a => a.Key == int.Parse(word)); //
                 print(k.ToDictionary(a => a.Key, b => b.Value), sorter);                  //      
                 Search(library, labels, sorter);                                          // 
             }
@@ -89,7 +89,7 @@ namespace LibraryTerminal
                 s--;
                 Console.Write($"Search {labels[s + 1]} ");                                        //Prompt user for
                 string word = Console.ReadLine();                                               //word to search in label[s].
-                var k = library.OrderBy(a => a.Value[s]).Where(a => a.Value[s].Contains(word)); //sort label[s] then sub list collections containing that word[word] in label.
+                var k = library.Where(a => a.Value[s].Contains(word)); //sort label[s] then sub list collections containing that word[word] in label.
                 print(k.ToDictionary(a => a.Key, b => b.Value), sorter);                            //pump new dictionary into print function so user can see it.
                 Search(library, labels, sorter);                                                //go back to search function.
             }
@@ -104,7 +104,7 @@ namespace LibraryTerminal
         static Dictionary<int, List<string>> RENT(Dictionary<int, List<string>> library, List<string> labels, string sorter, DateTime d)
         {
             string temp = "";
-            print(library, sorter);
+            //print(library, sorter);
             Console.WriteLine("~RENT BY ID~");
             Console.Write("Enter ID ");
             temp = Console.ReadLine();
@@ -119,7 +119,7 @@ namespace LibraryTerminal
                 return library;                                                                                //
             }
             d = DateTime.Now.AddDays(14);
-            Console.WriteLine(d.ToString("MM/dd"));
+            Console.WriteLine(d.ToString());
             library[n][3] = "out";
             library[n][4] = d.ToString("MM/dd").ToString();
             print(library.Where(a => a.Key == n).ToDictionary(a => a.Key, b => b.Value), sorter);
@@ -133,18 +133,31 @@ namespace LibraryTerminal
             DateTime d = new DateTime();
             loader(library);
             string sorter = "Name";
-            try
+            string c = "";
+            while (true)
             {
-
-                library = SORT(library, labels, ref sorter);
-                print(library, sorter);
-                Search(library, labels, sorter);
-                library = RENT(library, labels, sorter, d);
-                library = RENT(library, labels, sorter, d);
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message);
+                try
+                {
+                    Console.WriteLine("~MAIN MENU~\n1) Sort\n2) Search\n3) Rent\n4) Exit\n----------\nChoose an option: ");
+                    c = Console.ReadLine();
+                    if (c == "4")
+                        break;
+                    else if (c == "3")
+                        library = RENT(library, labels, sorter, d);
+                    else if (c == "2")
+                        Search(library, labels, sorter);
+                    else if (c == "1")
+                        library = SORT(library, labels, ref sorter);
+                    //library = SORT(library, labels, ref sorter);
+                    //print(library, sorter);
+                    //Search(library, labels, sorter);
+                    //library = RENT(library, labels, sorter, d);
+                    //library = RENT(library, labels, sorter, d);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.Message);
+                }
             }
         }
     }
