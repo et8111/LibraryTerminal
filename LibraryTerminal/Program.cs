@@ -27,7 +27,7 @@ namespace LibraryTerminal
         static void print(Dictionary<int, List<string>> library, string sorter)
         {
             Console.WriteLine($"*{sorter} sorted");     //let user know what category is being sorted
-            Console.WriteLine($"{"ID",-2}){"Title:",-40}|{"Auther:",-21}|{"Genre:",-16}|{"Status:",-8}|{"Date:",-6}|");                    //
+            Console.WriteLine($"{"ID",-2}){"Title:",-40}|{"Auther:",-21}|{"Genre:",-16}|{"Status:",-8}|{"Return:",-6}|");                    //
             Console.WriteLine("=".PadLeft(96, '='));                                                                             //print categories
             foreach (var v in library)                                                                                           //
                 Console.Write($"{v.Key,2}){v.Value[0],-40}|{v.Value[1],-21}|{v.Value[2],-16}|{v.Value[3],-8}|{v.Value[4],-6}|\n");//
@@ -42,7 +42,7 @@ namespace LibraryTerminal
             Console.WriteLine();                              //
             return int.Parse(Console.ReadLine()) - 1;
         }
-        static Dictionary<int, List<string>> SORT(Dictionary<int, List<string>> library, List<string> labels, ref string sorter)
+        static Dictionary<int,List<string>> SORT(Dictionary<int, List<string>> library, List<string> labels, ref string sorter)
         {
             print(library, sorter);
             int s = options(labels, "Sort By");
@@ -51,27 +51,27 @@ namespace LibraryTerminal
             else if( s == 0)
             {
                 sorter = labels[s];               //set sorter equal to the new label to sort by then pass lambda sort as dictionary back into sort
-                SORT(library.OrderBy(a => a.Key).ToDictionary(a => a.Key, a => a.Value), labels, ref sorter);
+                library = SORT(library.OrderBy(a => a.Key).ToDictionary(a => a.Key, a => a.Value), labels, ref sorter);
             }
             else if (s >= 1 && s <= 5)
             {
                 s--;
                 sorter = labels[s];               //set sorter equal to the new label to sort by then pass lambda sort as dictionary back into sort
-                SORT(library.OrderBy(a => a.Value[s]).ToDictionary(a => a.Key, a => a.Value), labels, ref sorter);
+                library = SORT( library.OrderBy(a => a.Value[s]).ToDictionary(a => a.Key, a => a.Value), labels, ref sorter);
             }
             else
             {                                                   //
                 Console.WriteLine("BAD NUMBER");                //user entered wrong
-                SORT(library, labels, ref sorter);              //
+                library = SORT( library, labels, ref sorter);              //
             }
             return library;
         }
 
-        static Dictionary<int, List<string>> Search(Dictionary<int,List<string>> library, List<string> labels, string sorter)
+        static void Search(Dictionary<int,List<string>> library, List<string> labels, string sorter)
         {
             int s = options(labels, "Search For");
             if (s == 6)
-                return library;
+                return;
             else if (s == 0)
             {
                 Console.Write($"Search {labels[s]} ");                                          
@@ -92,8 +92,33 @@ namespace LibraryTerminal
             else
             {
                 Console.WriteLine("BAD NUMBER");
-                SORT(library, labels, ref sorter);
+                SORT( library, labels, ref sorter);
             }
+            return;
+        }
+
+        static Dictionary<int, List<string>> RENT(Dictionary<int, List<string>> library, List<string> labels, string sorter, DateTime d)
+        {
+            string temp = "";
+            print(library, sorter);
+            Console.WriteLine("~RENT BY ID~");
+            Console.Write("Enter ID ");
+            temp = Console.ReadLine();
+            if (!int.TryParse(temp, out int n) || int.Parse(temp) > library.Count() - 1 || int.Parse(temp) < 0)
+            {
+                Console.WriteLine("BAD INPUT");
+                library = RENT(library, labels, sorter, d);
+            }
+            if (library[n][3] == "out")
+            {
+                Console.WriteLine("That books already Checked out :(");
+                return library;
+            }
+            d = DateTime.Now.AddDays(14);
+            Console.WriteLine(d.ToString("MM/dd"));
+            library[n][3] = "out";
+            library[n][4] = d.ToString("MM/dd").ToString();
+            print(library.Where(a =>a.Key == n).ToDictionary(a => a.Key, b => b.Value), sorter);
             return library;
         }
 
@@ -106,25 +131,16 @@ namespace LibraryTerminal
             string sorter = "Name";
             try
             {
-                temp = library = SORT(library, labels, ref sorter);                                                  //Done
-                //print(library, sorter);                                                                       //Done
-                temp = Search(library, labels, sorter);                                                              //Done
-                d = DateTime.Now;
-                d = d.AddDays(14);
-                Console.WriteLine(d.ToString("MM/dd"));
+
+                library = SORT( library, labels, ref sorter);
+                print(library, sorter);                                                             
+                Search(library, labels, sorter);
                 library = RENT(library, labels, sorter, d);
-                //print(library, sorter);
             }
             catch(Exception ex)
             {
                 Console.WriteLine(ex.Message);
             }
-        }
-        static Dictionary<int, List<string>> RENT(Dictionary<int,List<string>> library, List<String> labels, string sorter, DateTime d)
-        {
-            //use options(), prompt user to choose a category
-            ///retrieve as List 
-            return library;
         }
     }
 }
