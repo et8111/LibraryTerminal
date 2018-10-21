@@ -56,11 +56,11 @@ namespace LibraryTerminal
                 library = SORT(library, labels, ref sorter);   //
             }
             sorter = labels[s];
-            if (s == 0)
+            if (s == 0)//list index 0 is the 'ID' category and needs to be treated as an integar for sorting perposes
                 library = SORT(library.OrderBy(a => int.Parse(a.Value[0])).ToDictionary(a => a.Key, a => a.Value), labels, ref sorter);
-            else if (s >= 1 && s <= 5)//(s >= 1 && s <= 5)
+            else if (s >= 1 && s <= 5)//just sort the dictionary by the other list categories
                 library = SORT(library.OrderBy(a => a.Value[s]).ToDictionary(a => a.Key, a => a.Value), labels, ref sorter);
-            return library;
+            return library; //want the sort option to remain as is.
         }
 
         static Dictionary<int, List<string>> Search(Dictionary<int, List<string>> library, List<string> labels, string sorter)
@@ -69,14 +69,14 @@ namespace LibraryTerminal
             int s = options(labels, "Search For");
             if (s == 6)
                 return library;
-            else if (s >= 0 && s <= 5)//(s >= 1 && s <= 5)
+            else if (s >= 0 && s <= 5)
             {
                 Console.Write($"Search {labels[s]} ");
-                string word = Console.ReadLine();                        //word to search in label[s].
-                if (s == 0)
-                    tempD = library.Where(a => a.Key == int.Parse(word)).ToDictionary(a =>a.Key, a => a.Value);//sort label[s] then sub list collections containing that word[word] in label.
-                else
-                    tempD = library.Where(a => a.Value[s].Contains(word)).ToDictionary(a => a.Key, a => a.Value); ;//sort label[s] then sub list collections containing that word[word] in label.
+                string word = Console.ReadLine();
+                if (s == 0)//Filter into 'tempD' with the user input 'word' and treat as a integer because 'ID'
+                    tempD = library.Where(a => a.Key == int.Parse(word)).ToDictionary(a =>a.Key, a => a.Value);
+                else//Filter 'tempD' with user input 'word' in other categories
+                    tempD = library.Where(a => a.Value[s].Contains(word)).ToDictionary(a => a.Key, a => a.Value);
                 print(tempD.ToDictionary(a => a.Key, b => b.Value), sorter); //pump new dictionary into print function so user can see it.
                 if (tempD.Count() == 1 && tempD[tempD.Keys.First()][4] == "in")//rent book
                     RENTER(ref library, labels, sorter, tempD.Keys.First(), "rent");
@@ -129,6 +129,19 @@ namespace LibraryTerminal
                     Console.WriteLine(ex.Message);
                 }
             }
+            //List<List<string>> l = new List<List<string>>();
+            //l.Add(new List<string>());
+            //l[0].Add("Dog");
+            //l[0].Add("Gold");
+            //l.Add(new List<string>());
+            //l[1].Add("Cat");
+            //l[1].Add("Black");
+            //foreach (var v in l)
+            //    Console.WriteLine(string.Join(" ", v));
+            //var l1 = l.OrderBy(a => a[1]);
+            //Console.WriteLine(l1.GetType());
+            //foreach (var v in l)
+            //    Console.WriteLine(string.Join(" ", v));
         }
     }
 }
