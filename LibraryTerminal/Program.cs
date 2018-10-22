@@ -4,24 +4,27 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+/*IMPORTANT MEMO:
+ * In order to rent/return a book the user must reduce the 'checkout' option to 1 possibility.
+ */
 namespace LibraryTerminal
 {
     class Program
     {
         static void loader(Dictionary<int, List<string>> library)
         {//strictly for loading base info at start
-            library[0] = new List<string>() { "0","Behold a Pale Horse", "Milton William Cooper", "Fiction", "in", "" };
-            library[1] = new List<string>() { "1","The Master and Margarita", "Mikhail Bulgakov", "Fiction", "in", "" };
-            library[2] = new List<string>() { "2","Galveston: A Novel", "Nic Pizzolatto", "Fiction", "in", "" };
-            library[3] = new List<string>() { "3","Infected: A Novel", "Scott Sigler", "Fiction", "in", "" };
-            library[4] = new List<string>() { "4","Contagious (Infected Book 2)", "Scott Sigler", "Fiction", "in", "" };
-            library[5] = new List<string>() { "5","Confessions of an Economic Hit Man", "John Perkins", "Biography", "in", "" };
-            library[6] = new List<string>() { "6","How to Steal a Dog: A Novel", "Barbara O'Connor", "Fiction", "in", "" };
-            library[7] = new List<string>() { "7","The Very Hungry Caterpillar", "Eric Carle", "Kids", "in", "" };
-            library[8] = new List<string>() { "8","Goodnight Moon", "Margaret Wise Brown", "Kids", "in", "" };
-            library[9] = new List<string>() { "9","Brown Bear, Brown Bear, What Do You See?", "Bill Marin Jr.", "Kids", "in", "" };
-            library[10] = new List<string>() { "10","Full Disclosure", "Stormy Daniels", "Biography", "in", "" };
-            library[11] = new List<string>() { "11","The Adventures of Captain Underpants", "Dav Pilkey", "Action/Adventure", "in", "" };
+            library[0] = new List<string>() { "1","Behold a Pale Horse", "Milton William Cooper", "Fiction", "in", "" };
+            library[1] = new List<string>() { "2","The Master and Margarita", "Mikhail Bulgakov", "Fiction", "in", "" };
+            library[2] = new List<string>() { "3","Galveston: A Novel", "Nic Pizzolatto", "Fiction", "in", "" };
+            library[3] = new List<string>() { "4","Infected: A Novel", "Scott Sigler", "Fiction", "in", "" };
+            library[4] = new List<string>() { "5","Contagious (Infected Book 2)", "Scott Sigler", "Fiction", "in", "" };
+            library[5] = new List<string>() { "6","Confessions of an Economic Hit Man", "John Perkins", "Biography", "in", "" };
+            library[6] = new List<string>() { "7","How to Steal a Dog: A Novel", "Barbara O'Connor", "Fiction", "in", "" };
+            library[7] = new List<string>() { "8","The Very Hungry Caterpillar", "Eric Carle", "Kids", "in", "" };
+            library[8] = new List<string>() { "9","Goodnight Moon", "Margaret Wise Brown", "Kids", "in", "" };
+            library[9] = new List<string>() { "10","Brown Bear, Brown Bear, What Do You See?", "Bill Marin Jr.", "Kids", "in", "" };
+            library[10] = new List<string>() { "11","Full Disclosure", "Stormy Daniels", "Biography", "in", "" };
+            library[11] = new List<string>() { "12","The Adventures of Captain Underpants", "Dav Pilkey", "Action/Adventure", "in", "" };
         }
 
         static void print(Dictionary<int, List<string>> library, string sorter)
@@ -57,9 +60,9 @@ namespace LibraryTerminal
             }
             sorter = labels[s];
             if (s == 0)//list index 0 is the 'ID' category and needs to be treated as an integar for sorting perposes
-                library = SORT(library.OrderBy(a => int.Parse(a.Value[0])).ToDictionary(a => a.Key, a => a.Value), labels, ref sorter);
+                library = SORT(library.OrderBy(a => int.Parse(a.Value[0])).ToDictionary(a => a.Key, a => a.Value), labels, ref sorter); //inorder to keep sorted order i decided to use recursion
             else if (s >= 1 && s <= 5)//just sort the dictionary by the other list categories
-                library = SORT(library.OrderBy(a => a.Value[s]).ToDictionary(a => a.Key, a => a.Value), labels, ref sorter);
+                library = SORT(library.OrderBy(a => a.Value[s]).ToDictionary(a => a.Key, a => a.Value), labels, ref sorter);//inorder to keep sorted order i decided to use recursion
             return library; //want the sort option to remain as is.
         }
 
@@ -104,6 +107,26 @@ namespace LibraryTerminal
             }
         }
 
+        static Dictionary<int, List<string>> ADDER(Dictionary<int,List<string>> library, List<string> labels)
+        {
+            library.Add(library.Keys.Last()+1, new List<string>());
+            string temp = "";
+            library[library.Keys.Last()].Add((library.Keys.Last()+1).ToString());
+            for (int i = 1; i < labels.Count-2; i++)
+            {
+                ask1:
+                Console.Write($"Gimme a {labels[i]} ");
+                temp = Console.ReadLine();
+                if (string.IsNullOrEmpty(temp))
+                    goto ask1;
+                library[library.Keys.Last()].Add(temp);
+            }
+            library[library.Keys.Last()].Add("in");
+            library[library.Keys.Last()].Add("");
+            print(library, "testing");
+            return library;
+        }
+
         static void Main(string[] args)
         {
             Dictionary<int, List<string>> library = new Dictionary<int, List<string>>(), temp = new Dictionary<int, List<string>>();
@@ -115,10 +138,12 @@ namespace LibraryTerminal
             {
                 try
                 {
-                    Console.WriteLine("~MAIN MENU~\n1) Display\n2) Checkout\n3) Exit\n----------\nChoose an option: ");
+                    Console.WriteLine("~MAIN MENU~\n1) Display\n2) Checkout\n3) New Book\n4) Exit\n----------\nChoose an option: ");
                     c = Console.ReadLine();
-                    if (c == "3")
+                    if (c == "4")
                         break;
+                    else if (c == "3")
+                        library = ADDER(library, labels);
                     else if (c == "2")
                         Search(library, labels, sorter);
                     else if (c == "1")
@@ -129,19 +154,6 @@ namespace LibraryTerminal
                     Console.WriteLine(ex.Message);
                 }
             }
-            //List<List<string>> l = new List<List<string>>();
-            //l.Add(new List<string>());
-            //l[0].Add("Dog");
-            //l[0].Add("Gold");
-            //l.Add(new List<string>());
-            //l[1].Add("Cat");
-            //l[1].Add("Black");
-            //foreach (var v in l)
-            //    Console.WriteLine(string.Join(" ", v));
-            //var l1 = l.OrderBy(a => a[1]);
-            //Console.WriteLine(l1.GetType());
-            //foreach (var v in l)
-            //    Console.WriteLine(string.Join(" ", v));
         }
     }
 }
