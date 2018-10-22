@@ -29,12 +29,12 @@ namespace LibraryTerminal
 
         static void print(Dictionary<int, List<string>> library, string sorter)
         {
-            Console.WriteLine($"\n*{sorter} sorted");     //let user know what category is being sorted
-            Console.WriteLine($"{"ID",-2}){"Title:",-40}|{"Auther:",-21}|{"Genre:",-16}|{"Status:",-8}|{"Return:",-6}|");         //
-            Console.WriteLine("=".PadLeft(100, '='));                                                                             //print categories
-            foreach (var v in library)                                                                                            //
+            Console.WriteLine($"\n*{sorter} sorted");     //let user know what category is being sorted at all times
+            Console.WriteLine($"{"ID",-2}){"Title:",-40}|{"Auther:",-21}|{"Genre:",-16}|{"Status:",-8}|{"Return:",-6}|");              //
+            Console.WriteLine("=".PadLeft(100, '='));                                                                                  //print categories
+            foreach (var v in library)                                                                                                 //
                 Console.Write($"{v.Value[0],2}){v.Value[1],-40}|{v.Value[2],-21}|{v.Value[3],-16}|{v.Value[4],-8}|{v.Value[5],-7}|\n");//
-            Console.WriteLine();
+            Console.WriteLine();                                                                                                       //
         }
 
         static int options(List<string> labels, string msg)
@@ -52,14 +52,14 @@ namespace LibraryTerminal
             print(library, sorter);
             int s = options(labels, "Sort By");
             if (s == 6)
-                return library;    //Exits SORT() function when satisfied
+                return library;    //Exits SORT() function when satisfied with category sorted
             else if (s > 6 || s < 0)
             {
                 Console.WriteLine("BAD NUMBER");               //user entered wrong
                 library = SORT(library, labels, ref sorter);   //
             }
             sorter = labels[s];
-            if (s == 0)//list index 0 is the 'ID' category and needs to be treated as an integar for sorting perposes
+            if (s == 0)//list index 0 is the 'ID' category and needs to be treated as an integar for sorting purposes
                 library = SORT(library.OrderBy(a => int.Parse(a.Value[0])).ToDictionary(a => a.Key, a => a.Value), labels, ref sorter); //inorder to keep sorted order i decided to use recursion
             else if (s >= 1 && s <= 5)//just sort the dictionary by the other list categories
                 library = SORT(library.OrderBy(a => a.Value[s]).ToDictionary(a => a.Key, a => a.Value), labels, ref sorter);//inorder to keep sorted order i decided to use recursion
@@ -67,16 +67,16 @@ namespace LibraryTerminal
         }
 
         static Dictionary<int, List<string>> Search(Dictionary<int, List<string>> library, List<string> labels, string sorter)
-        {
+        {//Search uses 'tempD' as a filtered display but sends 'library' through all functions to be filtered
             Dictionary<int, List<string>> tempD = new Dictionary<int, List<string>>();
             int s = options(labels, "Search For");
             if (s == 6)
-                return library;
+                return library;             //exit search
             else if (s >= 0 && s <= 5)
             {
-                Console.Write($"Search {labels[s]} ");
-                string word = Console.ReadLine();
-                if (s == 0)//Filter into 'tempD' with the user input 'word' and treat as a integer because 'ID'
+                Console.Write($"Search {labels[s]} ");      //what category should be searched?
+                string word = Console.ReadLine();           //
+                if (s == 0)//Filter into 'tempD' with the user input 'word' and treat as a integer because 'ID' is a number
                     tempD = library.Where(a => a.Key == int.Parse(word)).ToDictionary(a =>a.Key, a => a.Value);
                 else//Filter 'tempD' with user input 'word' in other categories
                     tempD = library.Where(a => a.Value[s].Contains(word)).ToDictionary(a => a.Key, a => a.Value);
@@ -95,12 +95,11 @@ namespace LibraryTerminal
             return library;
         }
         static void RENTER(ref Dictionary<int,List<string>> library, List<string> labels, string sorter, int key, string rentReturn)
-        {
+        {//This function assumes the user wants to rent/return but and asks. User can refuse by pressing anything else.
             Console.Write($"Enter 'y' to {rentReturn}: ");
             if (Console.ReadLine() == "y")
             {
-                DateTime d = new DateTime();
-                d = DateTime.Now.AddDays(14);
+                DateTime d = DateTime.Now.AddDays(14);
                 library[key][4] = (rentReturn == "rent") ? "out" : "in";                                //if rentReturn == "rent" set to out
                 library[key][5] = (rentReturn == "rent") ? d.ToString("MM/dd").ToString() : "";         //if rentReturn == "rent" set return date
                 print(library.Where(a => a.Key == key).ToDictionary(a => a.Key, b => b.Value), sorter);
@@ -108,10 +107,10 @@ namespace LibraryTerminal
         }
 
         static Dictionary<int, List<string>> ADDER(Dictionary<int,List<string>> library, List<string> labels)
-        {
+        {//add a book
             library.Add(library.Keys.Last()+1, new List<string>());
             string temp = "";
-            library[library.Keys.Last()].Add((library.Keys.Last()+1).ToString());
+            library[library.Keys.Last()].Add((library.Keys.Last()+1).ToString());//incrementing the key by 1 and added a new book selection
             for (int i = 1; i < labels.Count-2; i++)
             {
                 ask1:
